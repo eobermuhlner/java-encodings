@@ -61,27 +61,60 @@ public class Encodings {
 	   + "    Special:  ¤ € ¼ ½ ¾ ²";
 
 	public static void main(String[] args) {
+		if (args.length == 2) {
+			printSearchEncodingDecoding(args[0], args[1]);
+		} else {
+			String text = TEST_STRING;
+			if (args.length == 1) {
+				text = args[0];
+			}
+			printEncodingCombinations(text);
+		}
+	}
+
+	private static void printSearchEncodingDecoding (String fromText, String toText) {
 		for (Encoding fromEncoding : Encoding.values()) {
 			for (Encoding toEncoding : Encoding.values()) {
-				printEncoding(fromEncoding, toEncoding);
+				try {
+					String output = decodeEncode(fromText, fromEncoding.code, toEncoding.code);
+					if (output.equals(toText)) {
+						System.out.println(fromEncoding.code + " (" + fromEncoding.name + ") to " + toEncoding.code + " (" + toEncoding.name + ")");
+					}
+				} catch (UnsupportedEncodingException e) {
+					// ignore
+				}
 			}
 		}
 	}
 
-	private static void printEncoding(Encoding fromEncoding, Encoding toEncoding) {
+	public static void printEncodingCombinations(String text) {
+		for (Encoding fromEncoding : Encoding.values()) {
+			for (Encoding toEncoding : Encoding.values()) {
+				printEncoding(text, fromEncoding, toEncoding);
+			}
+		}
+	}
+
+	private static void printEncoding(String text, Encoding fromEncoding, Encoding toEncoding) {
 		try {
 			if (fromEncoding.equals(toEncoding)) {
-				System.out.println("## " + fromEncoding.code + " (" + fromEncoding.name + ")");
+				System.out.println("### " + fromEncoding.code + " (" + fromEncoding.name + ")");
 			}
 			else {
-				System.out.println("## " + fromEncoding.code + " (" + fromEncoding.name + ") to " + toEncoding.code + " (" + toEncoding.name + ")");
+				System.out.println("### " + fromEncoding.code + " (" + fromEncoding.name + ") to " + toEncoding.code + " (" + toEncoding.name + ")");
 			}
 
-			System.out.println(new String(TEST_STRING.getBytes(fromEncoding.code), toEncoding.code));
+			System.out.println(decodeEncode(text, fromEncoding.code, toEncoding.code));
 			System.out.println();
 		}
 		catch (UnsupportedEncodingException ex) {
 			System.out.println("Encoding not supported: " + toEncoding.code);
 		}
 	}
+
+	private static String decodeEncode(String text, String fromEncoding, String toEncoding) throws UnsupportedEncodingException {
+		return new String(text.getBytes(fromEncoding), toEncoding);
+	}
+
+
 }
